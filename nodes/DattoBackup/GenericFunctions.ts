@@ -60,10 +60,15 @@ export async function dattoApiRequestAllItems(
 	let hasMorePages = true;
 
 	while (hasMorePages) {
-		qs._page = page;
-		qs._perPage = perPage;
+		const requestQs = { ...qs, _page: page, _perPage: perPage };
 
-		const response = (await dattoApiRequest.call(this, method, endpoint, body, qs)) as IDataObject;
+		const response = (await dattoApiRequest.call(
+			this,
+			method,
+			endpoint,
+			body,
+			requestQs,
+		)) as IDataObject;
 
 		const items = (response.items as IDataObject[]) || [];
 		returnData.push(...items);
@@ -79,9 +84,41 @@ export async function dattoApiRequestAllItems(
 		}
 
 		page++;
+
+		if (page > 500) {
+			// Safety break to prevent infinite loops
+			hasMorePages = false;
+		}
 	}
 
 	return returnData;
+}
+
+/**
+ * Handle standard "Get Many" request with pagination options
+ */
+export async function handleGetManyRequest(
+	this: IExecuteFunctions,
+	i: number,
+	endpoint: string,
+	qs: IDataObject = {},
+): Promise<IDataObject[]> {
+	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+	if (returnAll) {
+		return await dattoApiRequestAllItems.call(this, 'GET', endpoint, {}, qs);
+	} else {
+		const limit = this.getNodeParameter('limit', i) as number;
+		qs._perPage = limit;
+		const response = (await dattoApiRequest.call(
+			this,
+			'GET',
+			endpoint,
+			{},
+			qs,
+		)) as IDataObject;
+		return (response.items as IDataObject[]) || [];
+	}
 }
 
 /**
