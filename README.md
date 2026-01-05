@@ -1,8 +1,10 @@
 # Datto Backup Node for n8n
 
 [![npm version](https://badge.fury.io/js/%40joshuanode%2Fn8n-nodes-datto-backup.svg)](https://www.npmjs.com/package/@joshuanode/n8n-nodes-datto-backup)
-[![GitHub](https://img.shields.io/badge/GitHub-ajoshuasmith-181717?logo=github)](https://github.com/ajoshuasmith)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![n8n community](https://img.shields.io/badge/n8n-community%20node-ff6d5a?style=flat-square)](https://n8n.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![GitHub](https://img.shields.io/badge/GitHub-ajoshuasmith-181717?logo=github)](https://github.com/ajoshuasmith)
 
 Community node for the **Datto API** — built for MSPs managing backup devices at scale.
 
