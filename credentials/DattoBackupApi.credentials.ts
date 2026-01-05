@@ -44,7 +44,7 @@ export class DattoBackupApi implements ICredentialType {
 		properties: {
 			headers: {
 				Authorization:
-					'=Basic {{Buffer.from($credentials.publicKey.toString().trim() + ":" + $credentials.secretKey.toString().trim()).toString("base64")}}',
+					'=Basic {{btoa($credentials.publicKey.toString().trim() + ":" + $credentials.secretKey.toString().trim())}}',
 			},
 		},
 	};

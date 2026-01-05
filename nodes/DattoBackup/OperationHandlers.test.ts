@@ -14,12 +14,16 @@ describe('OperationHandlers', () => {
 		mockHttpRequest = jest.fn();
 		mockExecuteFunctions = {
 			getNodeParameter: mockGetNodeParameter,
+			getCredentials: jest.fn().mockResolvedValue({
+				publicKey: 'test-public',
+				secretKey: 'test-secret',
+			}),
 			getNode: jest.fn().mockReturnValue({}),
 			continueOnFail: jest.fn().mockReturnValue(false),
 			helpers: {
 				returnJsonArray: jest.fn((data) => data),
 				constructExecutionMetaData: jest.fn(),
-				httpRequestWithAuthentication: mockHttpRequest,
+				httpRequest: mockHttpRequest,
 			} as any,
 		};
 		jest.clearAllMocks();
@@ -36,10 +40,12 @@ describe('OperationHandlers', () => {
 
 			expect(mockGetNodeParameter).toHaveBeenCalledWith('serialNumber', 0);
 			expect(mockHttpRequest).toHaveBeenCalledWith(
-				'dattoBackupApi',
 				expect.objectContaining({
 					url: 'https://api.datto.com/v1/bcdr/device/12345',
-					method: 'GET'
+					method: 'GET',
+					headers: expect.objectContaining({
+						Authorization: expect.stringContaining('Basic '),
+					}),
 				})
 			);
 		});
@@ -69,13 +75,11 @@ describe('OperationHandlers', () => {
 			expect(mockHttpRequest).toHaveBeenCalledTimes(2);
 			expect(result).toHaveLength(2);
 			expect(mockHttpRequest).toHaveBeenNthCalledWith(1,
-				'dattoBackupApi',
 				expect.objectContaining({
 					qs: expect.objectContaining({ _page: 1 })
 				})
 			);
 			expect(mockHttpRequest).toHaveBeenNthCalledWith(2,
-				'dattoBackupApi',
 				expect.objectContaining({
 					qs: expect.objectContaining({ _page: 2 })
 				})
@@ -95,7 +99,6 @@ describe('OperationHandlers', () => {
 			await handler.call(mockExecuteFunctions as IExecuteFunctions, 0);
 
 			expect(mockHttpRequest).toHaveBeenCalledWith(
-				'dattoBackupApi',
 				expect.objectContaining({
 					qs: expect.objectContaining({ _perPage: 50 })
 				})
@@ -120,7 +123,6 @@ describe('OperationHandlers', () => {
 			await handler.call(mockExecuteFunctions as IExecuteFunctions, 0);
 
 			expect(mockHttpRequest).toHaveBeenCalledWith(
-				'dattoBackupApi',
 				expect.objectContaining({
 					url: `https://api.datto.com/v1/bcdr/device/${serialNumber}/asset/agent`
 				})
