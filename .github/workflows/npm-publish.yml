@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write # Required for OIDC Trusted Publishing
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,10 +25,8 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           if [[ "$VERSION" == *"-beta"* ]]; then
             echo "Detected beta version: $VERSION - Publishing with tag 'beta'"
-            npm publish --access public --tag beta
+            npm publish --access public --tag beta --provenance
           else
             echo "Detected production version: $VERSION - Publishing to 'latest'"
-            npm publish --access public
+            npm publish --access public --provenance
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
