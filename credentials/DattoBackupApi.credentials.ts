@@ -12,6 +12,8 @@ export class DattoBackupApi implements ICredentialType {
 
 	documentationUrl = 'https://portal.dattobackup.com/integrations/api';
 
+	extends = ['httpBasicAuth'];
+
 	icon = {
 		light: 'file:../nodes/DattoBackup/dattobackup.svg',
 		dark: 'file:../nodes/DattoBackup/dattobackup.svg',
@@ -20,7 +22,7 @@ export class DattoBackupApi implements ICredentialType {
 	properties: INodeProperties[] = [
 		{
 			displayName: 'Public API Key',
-			name: 'publicKey',
+			name: 'user',
 			type: 'string',
 			default: '',
 			required: true,
@@ -28,7 +30,7 @@ export class DattoBackupApi implements ICredentialType {
 		},
 		{
 			displayName: 'Secret API Key',
-			name: 'secretKey',
+			name: 'password',
 			type: 'string',
 			typeOptions: {
 				password: true,
@@ -39,15 +41,6 @@ export class DattoBackupApi implements ICredentialType {
 		},
 	];
 
-	authenticate: IAuthenticateGeneric = {
-		type: 'generic',
-		properties: {
-			headers: {
-				Authorization:
-					'=Basic {{btoa($credentials.publicKey.toString().trim() + ":" + $credentials.secretKey.toString().trim())}}',
-			},
-		},
-	};
 
 	test: ICredentialTestRequest = {
 		request: {
