@@ -41,6 +41,15 @@ export class DattoBackupApi implements ICredentialType {
 		},
 	];
 
+	authenticate: IAuthenticateGeneric = {
+		type: 'generic',
+		properties: {
+			headers: {
+				Authorization:
+					'={{`Basic ${Buffer.from($credentials.user + ":" + $credentials.password).toString("base64")}`}}',
+			},
+		},
+	};
 
 	test: ICredentialTestRequest = {
 		request: {
