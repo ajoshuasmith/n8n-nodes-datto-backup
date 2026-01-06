@@ -1,9 +1,9 @@
 import type {
-	IAuthenticateGeneric,
-	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
+
+import { testDattoCredentials } from './CredentialTester';
 
 export class DattoBackupApi implements ICredentialType {
 	name = 'dattoBackupApi';
@@ -39,25 +39,21 @@ export class DattoBackupApi implements ICredentialType {
 		},
 	];
 
-	authenticate: IAuthenticateGeneric = {
-		type: 'generic',
-		properties: {
-			headers: {
-				Authorization:
-					'=Basic {{Buffer.from($credentials.publicKey + ":" + $credentials.secretKey).toString("base64")}}',
-			},
-		},
-	};
-
-	test: ICredentialTestRequest = {
+	test = {
 		request: {
 			baseURL: 'https://api.datto.com/v1',
 			url: '/bcdr/device',
-			method: 'GET',
+			method: 'GET' as const,
 			qs: {
 				_page: 1,
 				_perPage: 1,
 			},
 		},
+	};
+
+	// Custom credential tester that runs in full Node.js context
+	testedBy = {
+		credentialType: 'dattoBackupApi',
+		testRequest: testDattoCredentials,
 	};
 }
