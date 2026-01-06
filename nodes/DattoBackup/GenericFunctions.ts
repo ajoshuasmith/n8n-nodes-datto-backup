@@ -22,6 +22,13 @@ export async function dattoApiRequest(
 ): Promise<IDataObject | IDataObject[]> {
 	const credentials = await this.getCredentials('dattoBackupApi');
 
+	// Debug: Log credential keys to see what we actually got
+	console.log('[DattoBackup] Credentials Keys:', Object.keys(credentials));
+
+	// Handle both new (publicKey) and old (user) field names
+	const username = (credentials.publicKey || credentials.user) as string;
+	const password = (credentials.secretKey || credentials.password) as string;
+
 	const options: IHttpRequestOptions = {
 		method,
 		url: `${BASE_URL}${endpoint}`,
@@ -29,8 +36,8 @@ export async function dattoApiRequest(
 		body,
 		json: true,
 		auth: {
-			username: credentials.publicKey as string,
-			password: credentials.secretKey as string,
+			username,
+			password,
 		},
 	};
 
