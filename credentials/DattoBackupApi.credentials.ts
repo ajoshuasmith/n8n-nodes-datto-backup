@@ -1,8 +1,7 @@
 import type {
-	ICredentialDataDecryptedObject,
-	ICredentialTestFunctions,
+	IAuthenticateGeneric,
+	ICredentialTestRequest,
 	ICredentialType,
-	INodeCredentialTestResult,
 	INodeProperties,
 } from 'n8n-workflow';
 
@@ -40,70 +39,28 @@ export class DattoBackupApi implements ICredentialType {
 		},
 	];
 
-	// Custom credential tester that runs in full Node.js context
-	// This avoids n8n expression limitations with Buffer.from()
-	testedBy = {
-		credentialType: 'dattoBackupApi',
-		testRequest: async function (
-			this: ICredentialTestFunctions,
-			credential: ICredentialDataDecryptedObject,
-		): Promise<INodeCredentialTestResult> {
-			const publicKey = (credential.publicKey as string).trim();
-			const secretKey = (credential.secretKey as string).trim();
+	// Tell n8n how to authenticate requests using this credential
+	// This is used by both the test button AND httpRequestWithAuthentication
+	authenticate: IAuthenticateGeneric = {
+		type: 'generic',
+		properties: {
+			auth: {
+				username: '={{$credentials.publicKey}}',
+				password: '={{$credentials.secretKey}}',
+			},
+		},
+	};
 
-			// Construct Auth Header
-			const authHeader = `Basic ${Buffer.from(`${publicKey}:${secretKey}`).toString('base64')}`;
-
-			// Debug Log (Server-side)
-			console.log(`[DattoBackup] Testing connection for User: ${publicKey}`);
-			console.log(`[DattoBackup] Auth Header Length: ${authHeader.length}`);
-
-			try {
-				const response = await this.helpers.request({
-					method: 'GET',
-					url: 'https://api.datto.com/v1/bcdr/device',
-					qs: {
-						_page: 1,
-						_perPage: 1,
-					},
-					headers: {
-						Authorization: authHeader,
-					},
-					json: true,
-					resolveWithFullResponse: true, // Get full response to check headers/status
-				});
-
-				console.log(`[DattoBackup] Connection Successful! Status: ${response.statusCode}`);
-
-				return {
-					status: 'OK',
-					message: 'Connection successful!',
-				};
-			} catch (error) {
-				const err = error as any;
-				console.error('[DattoBackup] Connection Failed:', err.message);
-
-				// Enhanced Error Message for UI
-				let uiMessage = `Connection failed: ${err.message}`;
-
-				// Safely access response details
-				if (err.response) {
-					if (err.response.status) {
-						uiMessage += ` (Status: ${err.response.status})`;
-					}
-					if (err.response.body && Array.isArray(err.response.body.messages)) {
-						uiMessage += ` | Details: ${JSON.stringify(err.response.body.messages)}`;
-					} else if (err.response.body) {
-						// Log body if it's not the standard messages array
-						console.error('[DattoBackup] Response Body:', JSON.stringify(err.response.body));
-					}
-				}
-
-				return {
-					status: 'Error',
-					message: uiMessage,
-				};
-			}
+	// Simple declarative test request - uses the authenticate block above
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: 'https://api.datto.com/v1',
+			url: '/bcdr/device',
+			method: 'GET',
+			qs: {
+				_page: 1,
+				_perPage: 1,
+			},
 		},
 	};
 }

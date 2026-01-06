@@ -104,7 +104,7 @@ export async function dattoApiRequestAllItems(
 }
 
 /**
- * Handle standard "Get Many" request with pagination options
+ * Handle standard "Get Many" request with pagination and sort options
  */
 export async function handleGetManyRequest(
 	this: IExecuteFunctions,
@@ -113,6 +113,19 @@ export async function handleGetManyRequest(
 	qs: IDataObject = {},
 ): Promise<IDataObject[]> {
 	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+	// Try to get options if they exist
+	try {
+		const options = this.getNodeParameter('options', i) as IDataObject;
+		if (options.sortBy) {
+			qs._sort = options.sortBy;
+		}
+		if (options.sortOrder) {
+			qs._order = options.sortOrder;
+		}
+	} catch {
+		// Options parameter doesn't exist for this operation
+	}
 
 	if (returnAll) {
 		return await dattoApiRequestAllItems.call(this, 'GET', endpoint, {}, qs);
@@ -169,7 +182,9 @@ export async function getSaasCustomers(
 	const customers: Array<{ name: string; value: string }> = [];
 
 	try {
+		console.log('[DattoBackup] Fetching SaaS domains...');
 		const items = await dattoApiRequestAllItems.call(this, 'GET', '/saas/domains');
+		console.log(`[DattoBackup] SaaS domains response: ${items.length} items`);
 
 		for (const domain of items) {
 			const name = domain.domain as string || domain.saasCustomerId as string;
@@ -182,9 +197,11 @@ export async function getSaasCustomers(
 				});
 			}
 		}
-	} catch {
+	} catch (error) {
+		console.error('[DattoBackup] Error fetching SaaS domains:', (error as Error).message);
 		// Return empty array if API call fails - user can still use expressions
 	}
 
+	console.log(`[DattoBackup] Returning ${customers.length} SaaS customers`);
 	return customers;
 }

@@ -74,4 +74,43 @@ export const shareFields: INodeProperties[] = [
 		},
 		description: 'Max number of results to return',
 	},
+	{
+		displayName: 'Options',
+		name: 'options',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['share'],
+				operation: ['getMany'],
+			},
+		},
+		description: 'Additional options',
+		options: [
+			{
+				displayName: 'Sort By',
+				name: 'sortBy',
+				type: 'options',
+				default: '',
+				options: [
+					{ name: 'None', value: '' },
+					{ name: 'Name', value: 'name' },
+					{ name: 'Last Snapshot', value: 'lastSnapshot' },
+				],
+				description: 'Field to sort results by',
+			},
+			{
+				displayName: 'Sort Order',
+				name: 'sortOrder',
+				type: 'options',
+				default: 'asc',
+				options: [
+					{ name: 'Ascending', value: 'asc' },
+					{ name: 'Descending', value: 'desc' },
+				],
+				description: 'Sort direction',
+			},
+		],
+	},
 ];

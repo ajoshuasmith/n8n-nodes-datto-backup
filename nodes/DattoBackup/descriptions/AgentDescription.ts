@@ -76,4 +76,45 @@ export const agentFields: INodeProperties[] = [
 		},
 		description: 'Max number of results to return',
 	},
+	{
+		displayName: 'Options',
+		name: 'options',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['agent'],
+				operation: ['getMany'],
+			},
+		},
+		description: 'Additional options to filter agent results',
+		options: [
+			{
+				displayName: 'Sort By',
+				name: 'sortBy',
+				type: 'options',
+				default: '',
+				options: [
+					{ name: 'None', value: '' },
+					{ name: 'Name', value: 'name' },
+					{ name: 'OS', value: 'os' },
+					{ name: 'Local IP', value: 'localIp' },
+					{ name: 'Last Snapshot', value: 'lastSnapshot' },
+				],
+				description: 'Field to sort results by',
+			},
+			{
+				displayName: 'Sort Order',
+				name: 'sortOrder',
+				type: 'options',
+				default: 'asc',
+				options: [
+					{ name: 'Ascending', value: 'asc' },
+					{ name: 'Descending', value: 'desc' },
+				],
+				description: 'Sort direction',
+			},
+		],
+	},
 ];
