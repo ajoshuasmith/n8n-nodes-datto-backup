@@ -117,6 +117,32 @@ export const deviceFields: INodeProperties[] = [
 				hint: 'Relevant for MSPs with sub-reseller hierarchies',
 				description: 'Whether to include devices from child resellers in the results',
 			},
+			{
+				displayName: 'Sort By',
+				name: 'sortBy',
+				type: 'options',
+				default: '',
+				options: [
+					{ name: 'None', value: '' },
+					{ name: 'Name', value: 'name' },
+					{ name: 'Last Seen Date', value: 'lastSeenDate' },
+					{ name: 'Registration Date', value: 'registrationDate' },
+					{ name: 'Model', value: 'model' },
+					{ name: 'Service Plan', value: 'servicePlan' },
+				],
+				description: 'Field to sort results by',
+			},
+			{
+				displayName: 'Sort Order',
+				name: 'sortOrder',
+				type: 'options',
+				default: 'asc',
+				options: [
+					{ name: 'Ascending', value: 'asc' },
+					{ name: 'Descending', value: 'desc' },
+				],
+				description: 'Sort direction',
+			},
 		],
 	},
 ];

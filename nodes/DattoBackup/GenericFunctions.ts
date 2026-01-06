@@ -104,7 +104,7 @@ export async function dattoApiRequestAllItems(
 }
 
 /**
- * Handle standard "Get Many" request with pagination options
+ * Handle standard "Get Many" request with pagination and sort options
  */
 export async function handleGetManyRequest(
 	this: IExecuteFunctions,
@@ -113,6 +113,19 @@ export async function handleGetManyRequest(
 	qs: IDataObject = {},
 ): Promise<IDataObject[]> {
 	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+	// Try to get options if they exist
+	try {
+		const options = this.getNodeParameter('options', i) as IDataObject;
+		if (options.sortBy) {
+			qs._sort = options.sortBy;
+		}
+		if (options.sortOrder) {
+			qs._order = options.sortOrder;
+		}
+	} catch {
+		// Options parameter doesn't exist for this operation
+	}
 
 	if (returnAll) {
 		return await dattoApiRequestAllItems.call(this, 'GET', endpoint, {}, qs);

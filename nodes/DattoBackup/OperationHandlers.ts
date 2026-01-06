@@ -34,6 +34,12 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 		if (options.showChildResellerDevices !== undefined) {
 			qs.showChildResellerDevices = options.showChildResellerDevices ? '1' : '0';
 		}
+		if (options.sortBy) {
+			qs._sort = options.sortBy;
+		}
+		if (options.sortOrder) {
+			qs._order = options.sortOrder;
+		}
 
 		if (returnAll) {
 			return await dattoApiRequestAllItems.call(
