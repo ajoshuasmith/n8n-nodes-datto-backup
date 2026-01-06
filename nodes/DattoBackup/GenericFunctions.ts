@@ -20,12 +20,18 @@ export async function dattoApiRequest(
 	body: IDataObject = {},
 	qs: IDataObject = {},
 ): Promise<IDataObject | IDataObject[]> {
+	const credentials = await this.getCredentials('dattoBackupApi');
+
 	const options: IHttpRequestOptions = {
 		method,
 		url: `${BASE_URL}${endpoint}`,
 		qs,
 		body,
 		json: true,
+		auth: {
+			username: credentials.publicKey as string,
+			password: credentials.secretKey as string,
+		},
 	};
 
 	if (Object.keys(body).length === 0) {
@@ -33,11 +39,7 @@ export async function dattoApiRequest(
 	}
 
 	try {
-		const response = await this.helpers.httpRequestWithAuthentication.call(
-			this,
-			'dattoBackupApi',
-			options,
-		);
+		const response = await this.helpers.httpRequest(options);
 		return response as IDataObject | IDataObject[];
 	} catch (error) {
 		throw new NodeApiError(this.getNode(), error as JsonObject);

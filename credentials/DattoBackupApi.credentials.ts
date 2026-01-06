@@ -82,17 +82,21 @@ export class DattoBackupApi implements ICredentialType {
 			} catch (error) {
 				const err = error as any;
 				console.error('[DattoBackup] Connection Failed:', err.message);
-				if (err.response) {
-					console.error('[DattoBackup] Response Body:', JSON.stringify(err.response.body));
-				}
 
 				// Enhanced Error Message for UI
 				let uiMessage = `Connection failed: ${err.message}`;
-				if (err.response?.body?.messages) {
-					// Datto API often returns error details in 'messages' array
-					uiMessage += ` | Details: ${JSON.stringify(err.response.body.messages)}`;
-				} else if (err.response?.status) {
-					uiMessage += ` (Status: ${err.response.status})`;
+
+				// Safely access response details
+				if (err.response) {
+					if (err.response.status) {
+						uiMessage += ` (Status: ${err.response.status})`;
+					}
+					if (err.response.body && Array.isArray(err.response.body.messages)) {
+						uiMessage += ` | Details: ${JSON.stringify(err.response.body.messages)}`;
+					} else if (err.response.body) {
+						// Log body if it's not the standard messages array
+						console.error('[DattoBackup] Response Body:', JSON.stringify(err.response.body));
+					}
 				}
 
 				return {
