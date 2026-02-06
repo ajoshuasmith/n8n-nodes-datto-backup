@@ -1,6 +1,6 @@
 {
   "name": "@joshuanode/n8n-nodes-datto-backup",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "n8n community node for Datto BCDR (Backup, Continuity & Disaster Recovery) API",
   "license": "MIT",
   "keywords": [
