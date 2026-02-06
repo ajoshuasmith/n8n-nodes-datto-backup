@@ -229,9 +229,13 @@ export async function getSaasCustomers(
 			}
 		}
 	} catch (error) {
-		console.error('[DattoBackup] Error fetching SaaS domains:', (error as Error).message);
-		// Re-throw the error so users can see what went wrong
-		throw error;
+		// Extract the actual error message for logging
+		const errorMessage = error instanceof Error
+			? error.message
+			: JSON.stringify(error);
+		console.error('[DattoBackup] Error fetching SaaS domains:', errorMessage);
+		// Return empty array - user can still use expressions to specify customer ID manually
+		// The n8n UI will show "No options found" which indicates the API call failed
 	}
 
 	console.log(`[DattoBackup] Returning ${customers.length} SaaS customers`);
