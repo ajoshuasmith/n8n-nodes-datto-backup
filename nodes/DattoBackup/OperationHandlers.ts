@@ -247,7 +247,34 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 	// ----------------------------------------
 	'saasApplication:getMany': async function (i: number) {
 		const saasCustomerId = this.getNodeParameter('saasCustomerId', i) as string;
-		return await handleGetManyRequest.call(this, i, `/saas/${saasCustomerId}/applications`);
+		const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+		// Fetch raw response to debug and handle different formats
+		const response = await dattoApiRequest.call(this, 'GET', `/saas/${saasCustomerId}/applications`);
+		console.log('[DattoBackup] SaaS applications raw response:', JSON.stringify(response, null, 2));
+
+		// Handle different possible response formats
+		let items: IDataObject[] = [];
+		if (Array.isArray(response)) {
+			items = response as IDataObject[];
+		} else if ((response as IDataObject).items) {
+			items = (response as IDataObject).items as IDataObject[];
+		} else if ((response as IDataObject).applications) {
+			items = (response as IDataObject).applications as IDataObject[];
+		} else if ((response as IDataObject).data) {
+			items = (response as IDataObject).data as IDataObject[];
+		} else {
+			console.log('[DattoBackup] Unexpected SaaS applications response structure, keys:', Object.keys(response));
+			if (response && typeof response === 'object' && !Array.isArray(response)) {
+				items = [response as IDataObject];
+			}
+		}
+
+		if (!returnAll) {
+			const limit = this.getNodeParameter('limit', i) as number;
+			return items.slice(0, limit);
+		}
+		return items;
 	},
 
 	// ----------------------------------------
