@@ -213,8 +213,10 @@ export async function getSaasCustomers(
 				''
 			);
 
-			// Try multiple possible field names for the display name
+			// Try multiple possible field names for the display name - prefer customer/org name over domain
 			const name = (
+				domain.saasCustomerName ||
+				domain.organizationName ||
 				domain.domain ||
 				domain.name ||
 				domain.customerName ||
