@@ -177,7 +177,34 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 	//              saasDomain
 	// ----------------------------------------
 	'saasDomain:getMany': async function (i: number) {
-		return await handleGetManyRequest.call(this, i, '/saas/domains');
+		const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+
+		// Fetch raw response to debug and handle different formats
+		const response = await dattoApiRequest.call(this, 'GET', '/saas/domains');
+		console.log('[DattoBackup] SaaS domains raw response:', JSON.stringify(response, null, 2));
+
+		// Handle different possible response formats
+		let items: IDataObject[] = [];
+		if (Array.isArray(response)) {
+			items = response as IDataObject[];
+		} else if ((response as IDataObject).items) {
+			items = (response as IDataObject).items as IDataObject[];
+		} else if ((response as IDataObject).data) {
+			items = (response as IDataObject).data as IDataObject[];
+		} else {
+			// Log unexpected structure for debugging
+			console.log('[DattoBackup] Unexpected SaaS domains response structure, keys:', Object.keys(response));
+			// Return the response as-is if it's an object (might be a single domain)
+			if (response && typeof response === 'object' && !Array.isArray(response)) {
+				items = [response as IDataObject];
+			}
+		}
+
+		if (!returnAll) {
+			const limit = this.getNodeParameter('limit', i) as number;
+			return items.slice(0, limit);
+		}
+		return items;
 	},
 
 	// ----------------------------------------
