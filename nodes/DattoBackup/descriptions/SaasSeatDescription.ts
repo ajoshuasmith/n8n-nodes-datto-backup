@@ -16,7 +16,7 @@ export const saasSeatOperations: INodeProperties[] = [
 				name: 'Get Many',
 				value: 'getMany',
 				description: 'Get SaaS Protection seats for a customer',
-				action: 'Get many saa s seats',
+				action: 'Get many SaaS seats',
 			},
 		],
 		default: 'getMany',
@@ -43,7 +43,8 @@ export const saasSeatFields: INodeProperties[] = [
 			},
 		},
 		hint: 'Select from dropdown or use an expression for dynamic workflows',
-		description: 'The SaaS Protection customer. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description:
+			'The SaaS Protection customer. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: 'Return All',

@@ -183,12 +183,43 @@ export async function getSaasCustomers(
 
 	try {
 		console.log('[DattoBackup] Fetching SaaS domains...');
-		const items = await dattoApiRequestAllItems.call(this, 'GET', '/saas/domains');
-		console.log(`[DattoBackup] SaaS domains response: ${items.length} items`);
+
+		// Fetch the raw response first to inspect structure
+		const response = await dattoApiRequest.call(this, 'GET', '/saas/domains');
+		console.log('[DattoBackup] SaaS domains raw response:', JSON.stringify(response, null, 2));
+
+		// Handle different possible response formats
+		let items: IDataObject[] = [];
+		if (Array.isArray(response)) {
+			items = response;
+		} else if ((response as IDataObject).items) {
+			items = (response as IDataObject).items as IDataObject[];
+		} else if ((response as IDataObject).data) {
+			items = (response as IDataObject).data as IDataObject[];
+		} else {
+			// Response might be a single object or have a different structure
+			console.log('[DattoBackup] Unexpected response structure, keys:', Object.keys(response));
+		}
+
+		console.log(`[DattoBackup] SaaS domains found: ${items.length} items`);
 
 		for (const domain of items) {
-			const name = domain.domain as string || domain.saasCustomerId as string;
-			const customerId = String(domain.saasCustomerId || '');
+			// Try multiple possible field names for the customer identifier
+			const customerId = String(
+				domain.saasCustomerId ||
+				domain.customerId ||
+				domain.id ||
+				domain.externalSubscriptionId ||
+				''
+			);
+
+			// Try multiple possible field names for the display name
+			const name = (
+				domain.domain ||
+				domain.name ||
+				domain.customerName ||
+				customerId
+			) as string;
 
 			if (customerId) {
 				customers.push({
@@ -199,7 +230,8 @@ export async function getSaasCustomers(
 		}
 	} catch (error) {
 		console.error('[DattoBackup] Error fetching SaaS domains:', (error as Error).message);
-		// Return empty array if API call fails - user can still use expressions
+		// Re-throw the error so users can see what went wrong
+		throw error;
 	}
 
 	console.log(`[DattoBackup] Returning ${customers.length} SaaS customers`);
