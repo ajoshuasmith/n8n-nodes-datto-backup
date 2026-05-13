@@ -328,4 +328,23 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 		}
 		return responseData;
 	},
+
+	// ----------------------------------------
+	//              custom (raw API)
+	// ----------------------------------------
+	'custom:request': async function (i: number) {
+		const method = this.getNodeParameter('method', i) as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+		const path = this.getNodeParameter('path', i) as string;
+		const qsRaw = this.getNodeParameter('queryString', i, '{}') as IDataObject | string;
+		const bodyRaw = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
+			? (this.getNodeParameter('body', i, '{}') as IDataObject | string)
+			: {};
+
+		const qs: IDataObject = typeof qsRaw === 'string' ? (qsRaw ? JSON.parse(qsRaw) : {}) : qsRaw;
+		const body: IDataObject = typeof bodyRaw === 'string' ? (bodyRaw ? JSON.parse(bodyRaw) : {}) : bodyRaw;
+
+		const response = await dattoApiRequest.call(this, method, path, body, qs);
+		if (Array.isArray(response)) return response as IDataObject[];
+		return [response as IDataObject];
+	},
 };

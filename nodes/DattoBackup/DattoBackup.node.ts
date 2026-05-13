@@ -45,6 +45,8 @@ import {
 	dtcRmmTemplateFields,
 	dtcStoragePoolOperations,
 	dtcStoragePoolFields,
+	customOperations,
+	customFields,
 } from './descriptions';
 
 export class DattoBackup implements INodeType {
@@ -144,6 +146,11 @@ export class DattoBackup implements INodeType {
 						value: 'volume',
 						description: 'Storage volumes on a device',
 					},
+					{
+						name: 'Custom (Raw)',
+						value: 'custom',
+						description: 'Make a raw authenticated request to any Datto API endpoint',
+					},
 				],
 				default: 'device',
 			},
@@ -189,6 +196,9 @@ export class DattoBackup implements INodeType {
 			// DTC Storage Pool
 			...dtcStoragePoolOperations,
 			...dtcStoragePoolFields,
+			// Custom (Raw)
+			...customOperations,
+			...customFields,
 		],
 		usableAsTool: true,
 	};
