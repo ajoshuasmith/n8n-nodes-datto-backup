@@ -1,6 +1,5 @@
 import type {
 	IExecuteFunctions,
-	IDataObject,
 	ILoadOptionsFunctions,
 	INodeExecutionData,
 	INodePropertyOptions,
@@ -97,6 +96,11 @@ export class DattoBackup implements INodeType {
 						description: 'Combined agents and shares for a device',
 					},
 					{
+						name: 'Custom (Raw)',
+						value: 'custom',
+						description: 'Make a raw authenticated request to any Datto API endpoint',
+					},
+					{
 						name: 'Device',
 						value: 'device',
 						description: 'BCDR hardware and cloud devices',
@@ -145,11 +149,6 @@ export class DattoBackup implements INodeType {
 						name: 'Volume',
 						value: 'volume',
 						description: 'Storage volumes on a device',
-					},
-					{
-						name: 'Custom (Raw)',
-						value: 'custom',
-						description: 'Make a raw authenticated request to any Datto API endpoint',
 					},
 				],
 				default: 'device',

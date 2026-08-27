@@ -1,4 +1,5 @@
 import type {
+	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
@@ -14,6 +15,21 @@ export class DattoBackupApi implements ICredentialType {
 		light: 'file:../nodes/DattoBackup/dattobackup.svg',
 		dark: 'file:../nodes/DattoBackup/dattobackup.svg',
 	} as const;
+
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: 'https://api.datto.com/v1',
+			url: '/bcdr/device',
+			method: 'GET',
+			qs: {
+				_perPage: 1,
+			},
+			auth: {
+				username: '={{$credentials.publicKey}}',
+				password: '={{$credentials.secretKey}}',
+			},
+		},
+	};
 
 	properties: INodeProperties[] = [
 		{
@@ -37,7 +53,4 @@ export class DattoBackupApi implements ICredentialType {
 		},
 	];
 
-	// Note: Test connection button is not supported due to n8n expression limitations.
-	// The node handles authentication directly via GenericFunctions.ts.
-	// Users can verify credentials by running a simple "Get Many Devices" operation.
 }

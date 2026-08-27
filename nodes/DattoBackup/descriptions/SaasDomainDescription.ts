@@ -16,7 +16,7 @@ export const saasDomainOperations: INodeProperties[] = [
 				name: 'Get Many',
 				value: 'getMany',
 				description: 'Get all SaaS Protection domains being protected',
-				action: 'Get many SaaS domains',
+				action: 'Get many domains',
 			},
 		],
 		default: 'getMany',

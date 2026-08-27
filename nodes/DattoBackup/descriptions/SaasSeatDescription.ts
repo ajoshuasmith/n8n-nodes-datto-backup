@@ -16,7 +16,7 @@ export const saasSeatOperations: INodeProperties[] = [
 				name: 'Get Many',
 				value: 'getMany',
 				description: 'Get SaaS Protection seats for a customer',
-				action: 'Get many SaaS seats',
+				action: 'Get many seats',
 			},
 		],
 		default: 'getMany',
