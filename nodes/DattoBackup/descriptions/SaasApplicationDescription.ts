@@ -16,7 +16,7 @@ export const saasApplicationOperations: INodeProperties[] = [
 				name: 'Get Many',
 				value: 'getMany',
 				description: 'Get SaaS Protection backup data for a customer',
-				action: 'Get many SaaS applications',
+				action: 'Get many applications',
 			},
 		],
 		default: 'getMany',

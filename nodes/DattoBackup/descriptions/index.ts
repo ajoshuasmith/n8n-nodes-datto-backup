@@ -12,3 +12,4 @@ export * from './SaasApplicationDescription';
 export * from './DtcAssetDescription';
 export * from './DtcRmmTemplateDescription';
 export * from './DtcStoragePoolDescription';
+export * from './CustomDescription';

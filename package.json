@@ -1,6 +1,6 @@
 {
   "name": "@joshuanode/n8n-nodes-datto-backup",
-  "version": "0.1.6",
+  "version": "0.1.8",
   "description": "n8n community node for Datto BCDR (Backup, Continuity & Disaster Recovery) API",
   "license": "MIT",
   "keywords": [
@@ -38,6 +38,7 @@
     "build": "n8n-node build && cp nodes/DattoBackup/dattobackup.svg dist/nodes/DattoBackup/",
     "build:watch": "tsc --watch",
     "dev": "n8n-node dev",
+    "test": "jest --runInBand",
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
     "release": "n8n-node release"

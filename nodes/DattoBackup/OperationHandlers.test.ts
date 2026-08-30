@@ -1,5 +1,8 @@
+import { DattoBackupApi } from '../../credentials/DattoBackupApi.credentials';
+import { getSaasCustomers } from './GenericFunctions';
 import { operationHandlers } from './OperationHandlers';
-import { IExecuteFunctions, IDataObject } from 'n8n-workflow';
+import type { IExecuteFunctions, ILoadOptionsFunctions } from 'n8n-workflow';
+import { NodeApiError } from 'n8n-workflow';
 
 // Don't mock GenericFunctions - verify the real logic flow
 // jest.mock('./GenericFunctions');
@@ -21,13 +24,26 @@ describe('OperationHandlers', () => {
 				returnJsonArray: jest.fn((data) => data),
 				constructExecutionMetaData: jest.fn(),
 				httpRequest: mockHttpRequest,
-			} as any,
+			} as unknown as IExecuteFunctions['helpers'],
 		};
 		jest.clearAllMocks();
 	});
 
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
+
 	describe('device:get', () => {
-		it('should call httpRequestWithAuthentication with correct path', async () => {
+		it('uses the same API key mapping in the n8n credential test', () => {
+			const credentialType = new DattoBackupApi();
+
+			expect(credentialType.test.request.auth).toEqual({
+				username: '={{$credentials.publicKey}}',
+				password: '={{$credentials.secretKey}}',
+			});
+		});
+
+		it('uses the configured API keys for HTTP Basic authentication', async () => {
 			const serialNumber = '12345';
 			mockGetNodeParameter.mockReturnValue(serialNumber);
 			mockHttpRequest.mockResolvedValue({ name: 'test-device' });
@@ -46,6 +62,64 @@ describe('OperationHandlers', () => {
 					},
 				})
 			);
+		});
+
+		it('preserves n8n API error wrapping for request failures', async () => {
+			mockGetNodeParameter.mockReturnValue('12345');
+			mockHttpRequest.mockRejectedValue({ statusCode: 401, message: 'Unauthorized' });
+
+			const handler = operationHandlers['device:get'];
+
+			await expect(
+				handler.call(mockExecuteFunctions as IExecuteFunctions, 0),
+			).rejects.toBeInstanceOf(NodeApiError);
+		});
+	});
+
+	describe('sensitive logging', () => {
+		it('does not log SaaS customer option responses', async () => {
+			const consoleLog = jest.spyOn(console, 'log').mockImplementation();
+			const consoleError = jest.spyOn(console, 'error').mockImplementation();
+			mockHttpRequest.mockResolvedValue({
+				items: [{ id: 'customer-123', organizationName: 'Example Customer' }],
+			});
+
+			const result = await getSaasCustomers.call(
+				mockExecuteFunctions as unknown as ILoadOptionsFunctions,
+			);
+
+			expect(result).toEqual([
+				{ name: 'Example Customer', value: 'customer-123' },
+			]);
+			expect(consoleLog).not.toHaveBeenCalled();
+			expect(consoleError).not.toHaveBeenCalled();
+		});
+
+		it('does not log Datto API responses or credential metadata', async () => {
+			const consoleLog = jest.spyOn(console, 'log').mockImplementation();
+			const consoleError = jest.spyOn(console, 'error').mockImplementation();
+			mockGetNodeParameter.mockImplementation((param) => {
+				if (param === 'saasCustomerId') return 'customer-123';
+				if (param === 'returnAll') return true;
+				return undefined;
+			});
+			mockHttpRequest.mockResolvedValue({ items: [{ id: 'record-1' }] });
+
+			await operationHandlers['saasDomain:getMany'].call(
+				mockExecuteFunctions as IExecuteFunctions,
+				0,
+			);
+			await operationHandlers['saasSeat:getMany'].call(
+				mockExecuteFunctions as IExecuteFunctions,
+				0,
+			);
+			await operationHandlers['saasApplication:getMany'].call(
+				mockExecuteFunctions as IExecuteFunctions,
+				0,
+			);
+
+			expect(consoleLog).not.toHaveBeenCalled();
+			expect(consoleError).not.toHaveBeenCalled();
 		});
 	});
 

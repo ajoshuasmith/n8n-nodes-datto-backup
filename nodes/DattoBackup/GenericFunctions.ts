@@ -22,9 +22,6 @@ export async function dattoApiRequest(
 ): Promise<IDataObject | IDataObject[]> {
 	const credentials = await this.getCredentials('dattoBackupApi');
 
-	// Debug: Log credential keys to see what we actually got
-	console.log('[DattoBackup] Credentials Keys:', Object.keys(credentials));
-
 	// Handle both new (publicKey) and old (user) field names
 	const username = (credentials.publicKey || credentials.user) as string;
 	const password = (credentials.secretKey || credentials.password) as string;
@@ -182,11 +179,7 @@ export async function getSaasCustomers(
 	const customers: Array<{ name: string; value: string }> = [];
 
 	try {
-		console.log('[DattoBackup] Fetching SaaS domains...');
-
-		// Fetch the raw response first to inspect structure
 		const response = await dattoApiRequest.call(this, 'GET', '/saas/domains');
-		console.log('[DattoBackup] SaaS domains raw response:', JSON.stringify(response, null, 2));
 
 		// Handle different possible response formats
 		let items: IDataObject[] = [];
@@ -196,12 +189,7 @@ export async function getSaasCustomers(
 			items = (response as IDataObject).items as IDataObject[];
 		} else if ((response as IDataObject).data) {
 			items = (response as IDataObject).data as IDataObject[];
-		} else {
-			// Response might be a single object or have a different structure
-			console.log('[DattoBackup] Unexpected response structure, keys:', Object.keys(response));
 		}
-
-		console.log(`[DattoBackup] SaaS domains found: ${items.length} items`);
 
 		for (const domain of items) {
 			// Try multiple possible field names for the customer identifier
@@ -230,16 +218,10 @@ export async function getSaasCustomers(
 				});
 			}
 		}
-	} catch (error) {
-		// Extract the actual error message for logging
-		const errorMessage = error instanceof Error
-			? error.message
-			: JSON.stringify(error);
-		console.error('[DattoBackup] Error fetching SaaS domains:', errorMessage);
+	} catch {
 		// Return empty array - user can still use expressions to specify customer ID manually
 		// The n8n UI will show "No options found" which indicates the API call failed
 	}
 
-	console.log(`[DattoBackup] Returning ${customers.length} SaaS customers`);
 	return customers;
 }

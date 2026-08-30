@@ -179,9 +179,7 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 	'saasDomain:getMany': async function (i: number) {
 		const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 
-		// Fetch raw response to debug and handle different formats
 		const response = await dattoApiRequest.call(this, 'GET', '/saas/domains');
-		console.log('[DattoBackup] SaaS domains raw response:', JSON.stringify(response, null, 2));
 
 		// Handle different possible response formats
 		let items: IDataObject[] = [];
@@ -192,8 +190,6 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 		} else if ((response as IDataObject).data) {
 			items = (response as IDataObject).data as IDataObject[];
 		} else {
-			// Log unexpected structure for debugging
-			console.log('[DattoBackup] Unexpected SaaS domains response structure, keys:', Object.keys(response));
 			// Return the response as-is if it's an object (might be a single domain)
 			if (response && typeof response === 'object' && !Array.isArray(response)) {
 				items = [response as IDataObject];
@@ -214,9 +210,7 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 		const saasCustomerId = this.getNodeParameter('saasCustomerId', i) as string;
 		const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 
-		// Fetch raw response to debug and handle different formats
 		const response = await dattoApiRequest.call(this, 'GET', `/saas/${saasCustomerId}/seats`);
-		console.log('[DattoBackup] SaaS seats raw response:', JSON.stringify(response, null, 2));
 
 		// Handle different possible response formats
 		let items: IDataObject[] = [];
@@ -229,7 +223,6 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 		} else if ((response as IDataObject).data) {
 			items = (response as IDataObject).data as IDataObject[];
 		} else {
-			console.log('[DattoBackup] Unexpected SaaS seats response structure, keys:', Object.keys(response));
 			if (response && typeof response === 'object' && !Array.isArray(response)) {
 				items = [response as IDataObject];
 			}
@@ -249,9 +242,7 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 		const saasCustomerId = this.getNodeParameter('saasCustomerId', i) as string;
 		const returnAll = this.getNodeParameter('returnAll', i) as boolean;
 
-		// Fetch raw response to debug and handle different formats
 		const response = await dattoApiRequest.call(this, 'GET', `/saas/${saasCustomerId}/applications`);
-		console.log('[DattoBackup] SaaS applications raw response:', JSON.stringify(response, null, 2));
 
 		// Handle different possible response formats
 		let items: IDataObject[] = [];
@@ -264,7 +255,6 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 		} else if ((response as IDataObject).data) {
 			items = (response as IDataObject).data as IDataObject[];
 		} else {
-			console.log('[DattoBackup] Unexpected SaaS applications response structure, keys:', Object.keys(response));
 			if (response && typeof response === 'object' && !Array.isArray(response)) {
 				items = [response as IDataObject];
 			}
@@ -300,7 +290,7 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 	// ----------------------------------------
 	//              dtcRmmTemplate
 	// ----------------------------------------
-	'dtcRmmTemplate:getMany': async function (i: number) {
+	'dtcRmmTemplate:getMany': async function () {
 		const responseData = await dattoApiRequest.call(
 			this,
 			'GET',
@@ -316,7 +306,7 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 	// ----------------------------------------
 	//              dtcStoragePool
 	// ----------------------------------------
-	'dtcStoragePool:getMany': async function (i: number) {
+	'dtcStoragePool:getMany': async function () {
 		const responseData = await dattoApiRequest.call(
 			this,
 			'GET',
@@ -327,5 +317,24 @@ export const operationHandlers: { [key: string]: OperationHandler } = {
 			return (responseData as IDataObject).items as IDataObject[] || [responseData];
 		}
 		return responseData;
+	},
+
+	// ----------------------------------------
+	//              custom (raw API)
+	// ----------------------------------------
+	'custom:request': async function (i: number) {
+		const method = this.getNodeParameter('method', i) as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+		const path = this.getNodeParameter('path', i) as string;
+		const qsRaw = this.getNodeParameter('queryString', i, '{}') as IDataObject | string;
+		const bodyRaw = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
+			? (this.getNodeParameter('body', i, '{}') as IDataObject | string)
+			: {};
+
+		const qs: IDataObject = typeof qsRaw === 'string' ? (qsRaw ? JSON.parse(qsRaw) : {}) : qsRaw;
+		const body: IDataObject = typeof bodyRaw === 'string' ? (bodyRaw ? JSON.parse(bodyRaw) : {}) : bodyRaw;
+
+		const response = await dattoApiRequest.call(this, method, path, body, qs);
+		if (Array.isArray(response)) return response as IDataObject[];
+		return [response as IDataObject];
 	},
 };
